@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kebena Church Song Display Plugin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* Main Container */
+        .song-display-container {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 9999;
+        }
+
+        /* Control Bar */
+        .control-bar {
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .song-info h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .song-info p {
+            font-size: 0.875rem;
+            color: #d1d5db;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: background 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .slide-counter {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 0.375rem;
+        }
+
+        /* Slide Display Area */
+        .slide-display {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            transition: background-color 0.3s ease;
+        }
+
+        .slide-content {
+            max-width: 80rem;
+            width: 100%;
+            text-align: center;
+        }
+
+        .slide-text {
+            white-space: pre-line;
+            font-size: 2.5rem;
+            line-height: 1.6;
+            transition: color 0.3s ease;
+        }
+
+        /* Navigation Bar */
+        .navigation-bar {
+            background: rgba(0, 0, 0, 0.95);
+            padding: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            padding: 0.75rem 2rem;
+            cursor: pointer;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .nav-btn svg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        /* Slide Indicators */
+        .slide-indicators {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .indicator {
+            height: 0.5rem;
+            background: rgba(255, 255, 255, 0.4);
+            border: none;
+            cursor: pointer;
+            border-radius: 9999px;
+            transition: all 0.2s;
+            width: 0.5rem;
+        }
+
+        .indicator:hover {
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .indicator.active {
+            width: 2rem;
+            background: white;
+        }
+
+        /* Keyboard Hints */
+        .keyboard-hints {
+            position: absolute;
+            bottom: 7rem;
+            right: 2rem;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .keyboard-hints p {
+            margin: 0.25rem 0;
+        }
+
+        /* Dark mode styles */
+        .dark-mode .slide-display {
+            background-color: #1a1a2e;
+        }
+
+        .dark-mode .slide-text {
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Light mode styles */
+        .light-mode .slide-display {
+            background-color: #ffffff;
+        }
+
+        .light-mode .slide-text {
+            color: #1a1a2e;
+            text-shadow: none;
+        }
+
+        /* Active state indicator */
+        .status-indicator {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background: #10b981;
+            margin-right: 0.5rem;
+        }
+
+        .status-indicator.inactive {
+            background: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div class="song-display-container dark-mode" id="songDisplayContainer">
+        <!-- Control Bar -->
+        <div class="control-bar">
+            <div class="song-info">
+                <h2 id="songTitleAmharic">Song Title (Amharic)</h2>
+                <p id="songTitleEnglish">Song Title (English) - #001</p>
+            </div>
+            
+            <div class="controls">
+                <!-- Slide Counter -->
+                <span class="slide-counter" id="slideCounter">1 / 1</span>
+
+                <!-- Auto-play Toggle -->
+                <button class="btn" id="autoPlayBtn" title="Auto-play (Space)">
+                    <svg id="playIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </button>
+                <button class="btn" id="pauseIcon" style="display:none;" title="Auto-play (Space)">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </button>
+
+                <!-- Theme Toggle -->
+                <button class="btn" id="themeToggleBtn" title="Toggle Theme">
+                    <svg id="sunIcon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                </button>
+
+                <!-- Presentation Mode -->
+                <button class="btn" id="presentationBtn" title="Presentation Mode (P)">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </button>
+
+                <!-- Full Screen -->
+                <button class="btn" id="fullscreenBtn" title="Fullscreen (F)">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Slide Display -->
+        <div class="slide-display" id="slideDisplay">
+            <div class="slide-content">
+                <div class="slide-text" id="slideText">
+                    Loading...
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navigation-bar">
+            <button class="nav-btn" id="prevBtn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Previous
+            </button>
+
+            <div class="slide-indicators" id="slideIndicators">
+                <!-- Dynamically generated -->
+            </div>
+
+            <button class="nav-btn" id="nextBtn">
+                Next
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Keyboard Hints -->
+        <div class="keyboard-hints">
+            <p>← → : Navigate slides</p>
+            <p>Space: Play/Pause</p>
+            <p>P: Presentation Mode</p>
+            <p>F: Fullscreen</p>
+            <p>Esc: Exit Fullscreen</p>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // SONG DATA (Replace with your actual song data)
+        // ============================================================================
+        
+        let currentSong = {
+            id: 1,
+            number: '001',
+            category: 'hymnal',
+            titleAmharic: 'እግዚአብሔር ሆይ ምሕረትህ',
+            titleEnglish: 'O God, Your Mercy',
+            lyrics: [
+                'እግዚአብሔር ሆይ ምሕረትህ\nበሰማይ ላይ ደረሰ\nእምነትህም እስከ ደመና\nይደርሳል ምንም ሳይለወጥ',
+                'ጽድቅህ እንደ ተራሮች ተራራ ነው\nፍርድህም እንደ ታላቅ ጥልቅ\nእግዚአብሔር ሆይ ሰውንና እንስሳን\nታድናለህ በምሕረትህ',
+                'በምድር ላይ ያሉት ሰዎች\nበክንፍህ ጥላ ይተማመናሉ\nከቤትህ ጣፋጭነት ይጠግባሉ\nከደስታህ ወንዝ ታጠጣቸዋለህ'
+            ]
+        };
+
+        // ============================================================================
+        // STATE MANAGEMENT
+        // ============================================================================
+        
+        let state = {
+            currentSlide: 0,
+            isAutoPlay: false,
+            isDarkMode: true,
+            autoPlayInterval: null,
+            presentationWindow: null,
+            background: '#1a1a2e'
+        };
+
+        // ============================================================================
+        // DOM ELEMENTS
+        // ============================================================================
+        
+        const elements = {
+            container: document.getElementById('songDisplayContainer'),
+            titleAmharic: document.getElementById('songTitleAmharic'),
+            titleEnglish: document.getElementById('songTitleEnglish'),
+            slideCounter: document.getElementById('slideCounter'),
+            slideText: document.getElementById('slideText'),
+            slideDisplay: document.getElementById('slideDisplay'),
+            slideIndicators: document.getElementById('slideIndicators'),
+            prevBtn: document.getElementById('prevBtn'),
+            nextBtn: document.getElementById('nextBtn'),
+            autoPlayBtn: document.getElementById('autoPlayBtn'),
+            themeToggleBtn: document.getElementById('themeToggleBtn'),
+            presentationBtn: document.getElementById('presentationBtn'),
+            fullscreenBtn: document.getElementById('fullscreenBtn'),
+            playIcon: document.getElementById('playIcon'),
+            pauseIcon: document.getElementById('pauseIcon')
+        };
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+        
+        function init() {
+            loadSong(currentSong);
+            setupEventListeners();
+            updateDisplay();
+        }
+
+        function loadSong(song) {
+            currentSong = song;
+            state.currentSlide = 0;
+            elements.titleAmharic.textContent = song.titleAmharic;
+            elements.titleEnglish.textContent = `${song.titleEnglish} - #${song.number}`;
+            generateSlideIndicators();
+            updateDisplay();
+        }
+
+        // ============================================================================
+        // SLIDE NAVIGATION
+        // ============================================================================
+        
+        function goToSlide(index) {
+            if (index >= 0 && index < currentSong.lyrics.length) {
+                state.currentSlide = index;
+                updateDisplay();
+                syncPresentationWindow();
+            }
+        }
+
+        function nextSlide() {
+            if (state.currentSlide < currentSong.lyrics.length - 1) {
+                goToSlide(state.currentSlide + 1);
+            }
+        }
+
+        function prevSlide() {
+            if (state.currentSlide > 0) {
+                goToSlide(state.currentSlide - 1);
+            }
+        }
+
+        // ============================================================================
+        // UPDATE DISPLAY
+        // ============================================================================
+        
+        function updateDisplay() {
+            // Update slide text
+            elements.slideText.textContent = currentSong.lyrics[state.currentSlide];
+            
+            // Update counter
+            elements.slideCounter.textContent = `${state.currentSlide + 1} / ${currentSong.lyrics.length}`;
+            
+            // Update navigation buttons
+            elements.prevBtn.disabled = state.currentSlide === 0;
+            elements.nextBtn.disabled = state.currentSlide === currentSong.lyrics.length - 1;
+            
+            // Update slide indicators
+            updateSlideIndicators();
+            
+            // Update background color
+            const bgColor = state.isDarkMode ? state.background : '#ffffff';
+            elements.slideDisplay.style.backgroundColor = bgColor;
+        }
+
+        function generateSlideIndicators() {
+            elements.slideIndicators.innerHTML = '';
+            currentSong.lyrics.forEach((_, index) => {
+                const indicator = document.createElement('button');
+                indicator.className = 'indicator';
+                indicator.setAttribute('aria-label', `Go to slide ${index + 1}`);
+                indicator.addEventListener('click', () => goToSlide(index));
+                elements.slideIndicators.appendChild(indicator);
+            });
+        }
+
+        function updateSlideIndicators() {
+            const indicators = elements.slideIndicators.querySelectorAll('.indicator');
+            indicators.forEach((indicator, index) => {
+                if (index === state.currentSlide) {
+                    indicator.classList.add('active');
+                } else {
+                    indicator.classList.remove('active');
+                }
+            });
+        }
+
+        // ============================================================================
+        // AUTO-PLAY
+        // ============================================================================
+        
+        function toggleAutoPlay() {
+            state.isAutoPlay = !state.isAutoPlay;
+            
+            if (state.isAutoPlay) {
+                elements.playIcon.parentElement.style.display = 'none';
+                elements.pauseIcon.style.display = 'flex';
+                startAutoPlay();
+            } else {
+                elements.playIcon.parentElement.style.display = 'flex';
+                elements.pauseIcon.style.display = 'none';
+                stopAutoPlay();
+            }
+        }
+
+        function startAutoPlay() {
+            state.autoPlayInterval = setInterval(() => {
+                if (state.currentSlide < currentSong.lyrics.length - 1) {
+                    nextSlide();
+                } else {
+                    goToSlide(0); // Loop back to start
+                }
+            }, 5000); // 5 seconds per slide
+        }
+
+        function stopAutoPlay() {
+            if (state.autoPlayInterval) {
+                clearInterval(state.autoPlayInterval);
+                state.autoPlayInterval = null;
+            }
+        }
+
+        // ============================================================================
+        // THEME TOGGLE
+        // ============================================================================
+        
+        function toggleTheme() {
+            state.isDarkMode = !state.isDarkMode;
+            
+            if (state.isDarkMode) {
+                elements.container.classList.remove('light-mode');
+                elements.container.classList.add('dark-mode');
+            } else {
+                elements.container.classList.remove('dark-mode');
+                elements.container.classList.add('light-mode');
+            }
+            
+            updateDisplay();
+            syncPresentationWindow();
+        }
+
+        // ============================================================================
+        // PRESENTATION MODE
+        // ============================================================================
+        
+        function openPresentationMode() {
+            // Close existing window if open
+            if (state.presentationWindow && !state.presentationWindow.closed) {
+                state.presentationWindow.close();
+            }
+
+            // Open new window
+            state.presentationWindow = window.open(
+                '', 
+                'PresentationMode', 
+                'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no'
+            );
+            
+            if (state.presentationWindow) {
+                const bgColor = state.isDarkMode ? state.background : '#ffffff';
+                const textColor = state.isDarkMode ? '#ffffff' : '#1a1a2e';
+                
+                state.presentationWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Presentation - ${currentSong.titleEnglish}</title>
+                        <style>
+                            * {
+                                margin: 0;
+                                padding: 0;
+                                box-sizing: border-box;
+                            }
+                            body {
+                                width: 100vw;
+                                height: 100vh;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                background-color: ${bgColor};
+                                color: ${textColor};
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+                                overflow: hidden;
+                            }
+                            #slide-content {
+                                max-width: 90%;
+                                text-align: center;
+                                font-size: 3rem;
+                                line-height: 1.6;
+                                white-space: pre-line;
+                                text-shadow: ${state.isDarkMode ? '2px 2px 4px rgba(0,0,0,0.5)' : 'none'};
+                                padding: 2rem;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div id="slide-content">${currentSong.lyrics[state.currentSlide]}</div>
+                        <script>
+                            window.addEventListener('message', (event) => {
+                                if (event.data.type === 'SLIDE_UPDATE') {
+                                    document.body.style.backgroundColor = event.data.background;
+                                    document.body.style.color = event.data.textColor;
+                                    document.getElementById('slide-content').textContent = event.data.content;
+                                    document.getElementById('slide-content').style.textShadow = 
+                                        event.data.textColor === '#ffffff' ? '2px 2px 4px rgba(0,0,0,0.5)' : 'none';
+                                }
+                            });
+                        <\/script>
+                    </body>
+                    </html>
+                `);
+                state.presentationWindow.document.close();
+            }
+        }
+
+        function syncPresentationWindow() {
+            if (state.presentationWindow && !state.presentationWindow.closed) {
+                state.presentationWindow.postMessage({
+                    type: 'SLIDE_UPDATE',
+                    slide: state.currentSlide,
+                    content: currentSong.lyrics[state.currentSlide],
+                    background: state.isDarkMode ? state.background : '#ffffff',
+                    textColor: state.isDarkMode ? '#ffffff' : '#1a1a2e'
+                }, '*');
+            }
+        }
+
+        // ============================================================================
+        // FULLSCREEN
+        // ============================================================================
+        
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        // ============================================================================
+        // EVENT LISTENERS
+        // ============================================================================
+        
+        function setupEventListeners() {
+            // Navigation buttons
+            elements.prevBtn.addEventListener('click', prevSlide);
+            elements.nextBtn.addEventListener('click', nextSlide);
+            
+            // Control buttons
+            elements.autoPlayBtn.addEventListener('click', toggleAutoPlay);
+            elements.themeToggleBtn.addEventListener('click', toggleTheme);
+            elements.presentationBtn.addEventListener('click', openPresentationMode);
+            elements.fullscreenBtn.addEventListener('click', toggleFullscreen);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', handleKeyPress);
+            
+            // Clean up on page unload
+            window.addEventListener('beforeunload', () => {
+                if (state.presentationWindow && !state.presentationWindow.closed) {
+                    state.presentationWindow.close();
+                }
+            });
+        }
+
+        function handleKeyPress(e) {
+            switch(e.key) {
+                case 'ArrowRight':
+                    nextSlide();
+                    break;
+                case 'ArrowLeft':
+                    prevSlide();
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    toggleAutoPlay();
+                    break;
+                case 'p':
+                case 'P':
+                    e.preventDefault();
+                    openPresentationMode();
+                    break;
+                case 'f':
+                case 'F':
+                    e.preventDefault();
+                    toggleFullscreen();
+                    break;
+            }
+        }
+
+        // ============================================================================
+        // API FOR EXTERNAL USE
+        // ============================================================================
+        
+        window.SongDisplayPlugin = {
+            loadSong: loadSong,
+            nextSlide: nextSlide,
+            prevSlide: prevSlide,
+            goToSlide: goToSlide,
+            toggleAutoPlay: toggleAutoPlay,
+            toggleTheme: toggleTheme,
+            openPresentationMode: openPresentationMode,
+            setBackground: (color) => {
+                state.background = color;
+                updateDisplay();
+            },
+            getCurrentSlide: () => state.currentSlide,
+            getSong: () => currentSong
+        };
+
+        // ============================================================================
+        // START THE APP
+        // ============================================================================
+        
+        init();
+    </script>
+</body>
+</html>
