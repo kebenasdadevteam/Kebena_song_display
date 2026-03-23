@@ -73,32 +73,14 @@ export function MobileControl({
   };
 
   const openInNewTab = (url: string, type: string) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
-    toast.success(`Opening ${type} in new tab`);
+    void url;
+    toast.info(`${type} popup is disabled`);
   };
 
   const openDisplayScreen = () => {
-    const win = window.open(
-      displayUrl,
-      'ChurchDisplay',
-      'width=1920,height=1080,menubar=no,toolbar=no,location=no,status=no'
-    );
-
-    if (win) {
-      setTimeout(() => {
-        win.postMessage(
-          {
-            type: 'SET_BACKGROUND',
-            background: background || '#000000',
-          },
-          window.location.origin
-        );
-      }, 1000);
-
-      toast.success('Display screen opened in new window');
-    } else {
-      toast.error('Please allow popups to open display screen');
-    }
+    void displayUrl;
+    void background;
+    toast.info('Display popup is disabled');
   };
 
   const handleSync = () => {

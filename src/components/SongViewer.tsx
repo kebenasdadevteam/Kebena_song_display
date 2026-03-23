@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Song } from '../types';
 import { Button } from './ui/button';
-import { X, ChevronLeft, ChevronRight, Play, Pause, Moon, Sun, Monitor, Eye, EyeOff } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Play, Pause, Moon, Sun, Monitor, Eye, EyeOff, Type, Minus, Plus } from 'lucide-react';
 import { displayStateService } from '../services/displayStateService';
 import { toast } from 'sonner';
 
@@ -9,6 +9,7 @@ interface SongViewerProps {
   song: Song;
   onClose: () => void;
   background: string;
+  roomId: string;
   onOpenDisplayWindow: () => Window | null;
   onSyncSongToDisplay?: (song: Song, slideIndex: number) => void;
   onClearDisplay?: () => void;
@@ -18,14 +19,32 @@ export function SongViewer({
   song,
   onClose,
   background,
+  roomId,
   onOpenDisplayWindow,
   onSyncSongToDisplay,
   onClearDisplay,
 }: Readonly<SongViewerProps>) {
+  const SONG_BG_COLOR_KEY = 'display_song_background_color_v1';
+  const SONG_TEXT_COLOR_KEY = 'display_song_text_color_v1';
+  const SONG_FONT_SIZE_KEY = 'display_song_font_size_px_v1';
+  const MIN_FONT_SIZE = 28;
+  const MAX_FONT_SIZE = 100;
+
+  const initialSongBackground = localStorage.getItem(SONG_BG_COLOR_KEY) || '#000000';
+  const initialSongTextColor = localStorage.getItem(SONG_TEXT_COLOR_KEY) || '#ffffff';
+  const initialSongFontSize = Number(localStorage.getItem(SONG_FONT_SIZE_KEY) || '56');
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [isDisplaying, setIsDisplaying] = useState(false);
+  const [songBackgroundColor, setSongBackgroundColor] = useState(initialSongBackground);
+  const [songTextColor, setSongTextColor] = useState(initialSongTextColor);
+  const [songFontSize, setSongFontSize] = useState(
+    Number.isFinite(initialSongFontSize)
+      ? Math.min(Math.max(initialSongFontSize, MIN_FONT_SIZE), MAX_FONT_SIZE)
+      : 56
+  );
 
   // Initialize display service
   useEffect(() => {
@@ -40,7 +59,22 @@ export function SongViewer({
     if (isDisplaying) {
       updateDisplay();
     }
-  }, [currentSlide, isDisplaying, background]);
+  }, [currentSlide, isDisplaying, background, songBackgroundColor, songTextColor, songFontSize]);
+
+  useEffect(() => {
+    localStorage.setItem(SONG_BG_COLOR_KEY, songBackgroundColor);
+    localStorage.setItem(SONG_TEXT_COLOR_KEY, songTextColor);
+    localStorage.setItem(SONG_FONT_SIZE_KEY, String(songFontSize));
+
+    const channelName = `kebena-display-${roomId || 'default'}`;
+    if (typeof BroadcastChannel !== 'undefined') {
+      const channel = new BroadcastChannel(channelName);
+      channel.postMessage({ type: 'SET_SONG_BG_COLOR', color: songBackgroundColor });
+      channel.postMessage({ type: 'SET_SONG_TEXT_COLOR', color: songTextColor });
+      channel.postMessage({ type: 'SET_SONG_FONT_SIZE', size: songFontSize });
+      channel.close();
+    }
+  }, [roomId, songBackgroundColor, songTextColor, songFontSize]);
 
   const updateDisplay = async () => {
     await displayStateService.updateDisplayState({
@@ -49,8 +83,17 @@ export function SongViewer({
       songId: song.id,
       songData: song,
       songSlide: currentSlide,
-      background: isDarkMode ? background : '#ffffff',
+      background,
     });
+
+    const channelName = `kebena-display-${roomId || 'default'}`;
+    if (typeof BroadcastChannel !== 'undefined') {
+      const channel = new BroadcastChannel(channelName);
+      channel.postMessage({ type: 'SET_SONG_BG_COLOR', color: songBackgroundColor });
+      channel.postMessage({ type: 'SET_SONG_TEXT_COLOR', color: songTextColor });
+      channel.postMessage({ type: 'SET_SONG_FONT_SIZE', size: songFontSize });
+      channel.close();
+    }
 
     onSyncSongToDisplay?.(song, currentSlide);
   };
@@ -148,6 +191,19 @@ export function SongViewer({
     onOpenDisplayWindow();
   };
 
+  const toggleThemePreset = () => {
+    if (isDarkMode) {
+      setSongBackgroundColor('#ffffff');
+      setSongTextColor('#111111');
+      setIsDarkMode(false);
+      return;
+    }
+
+    setSongBackgroundColor('#000000');
+    setSongTextColor('#ffffff');
+    setIsDarkMode(true);
+  };
+
   const nextSlide = () => {
     setCurrentSlide(prev => 
       prev < song.lyrics.length - 1 ? prev + 1 : prev
@@ -158,8 +214,8 @@ export function SongViewer({
     setCurrentSlide(prev => prev > 0 ? prev - 1 : prev);
   };
 
-  const bgColor = isDarkMode ? background : '#ffffff';
-  const textColor = isDarkMode ? '#ffffff' : '#1a1a2e';
+  const bgColor = songBackgroundColor;
+  const textColor = songTextColor;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col">
@@ -170,11 +226,75 @@ export function SongViewer({
           <p className="text-sm text-gray-300">{song.titleEnglish} - #{song.number}</p>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap overflow-x-auto">
           {/* Slide Counter */}
           <span className="text-sm px-3 py-1 bg-white/10 rounded">
             {currentSlide + 1} / {song.lyrics.length}
           </span>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] uppercase tracking-wide text-white/70">Song BG</span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 px-2 text-[11px] text-black border-white/40 hover:bg-white/10"
+              onClick={() => setSongBackgroundColor('#000000')}
+            >
+              Black
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 px-2 text-[11px] text-black border-white/40 hover:bg-white/10"
+              onClick={() => setSongBackgroundColor('#ffffff')}
+            >
+              White
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] uppercase tracking-wide text-white/70">Text</span>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 px-2 text-[11px] text-black border-white/40 hover:bg-white/10"
+              onClick={() => setSongTextColor('#000000')}
+            >
+              Black
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 px-2 text-[11px] text-black border-white/40 hover:bg-white/10"
+              onClick={() => setSongTextColor('#ffffff')}
+            >
+              White
+            </Button>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <Type className="size-3.5 text-white/80" />
+            <span className="text-[11px] uppercase tracking-wide text-white/70">Font</span>
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-7 w-7 text-black border-white/40 hover:bg-white/10"
+              onClick={() => setSongFontSize((prev) => Math.max(prev - 2, MIN_FONT_SIZE))}
+              title="Decrease font size"
+            >
+              <Minus className="size-3.5" />
+            </Button>
+            <span className="text-sm min-w-10 text-center">{songFontSize}px</span>
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-7 w-7 text-black border-white/40 hover:bg-white/10"
+              onClick={() => setSongFontSize((prev) => Math.min(prev + 2, MAX_FONT_SIZE))}
+              title="Increase font size"
+            >
+              <Plus className="size-3.5" />
+            </Button>
+          </div>
 
           {/* Show/Hide on Display Toggle */}
           {isDisplaying ? (
@@ -230,8 +350,9 @@ export function SongViewer({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setIsDarkMode(!isDarkMode)}
+            onClick={toggleThemePreset}
             className="text-white hover:bg-white/20"
+            title="Quick dark/light preset"
           >
             {isDarkMode ? (
               <Sun className="size-5" />
@@ -279,7 +400,7 @@ export function SongViewer({
           disabled={currentSlide === 0}
           size="lg"
           variant="outline"
-          className="text-white border-white hover:bg-white/20"
+          className="text-black border-white hover:bg-white/20"
         >
           <ChevronLeft className="size-6 mr-2" />
           Previous
@@ -306,7 +427,7 @@ export function SongViewer({
           disabled={currentSlide === song.lyrics.length - 1}
           size="lg"
           variant="outline"
-          className="text-white border-white hover:bg-white/20"
+          className="text-black border-white hover:bg-white/20"
         >
           Next
           <ChevronRight className="size-6 ml-2" />

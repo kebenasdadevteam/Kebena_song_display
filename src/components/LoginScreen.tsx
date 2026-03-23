@@ -35,6 +35,20 @@ const MOCK_USERS = [
     password: 'pastor123',
     name: 'Pastor Daniel',
     role: 'admin' as const
+  },
+  {
+    id: '4',
+    username: 'songleader',
+    password: 'song123',
+    name: 'Worship Leader',
+    role: 'song_leader' as const
+  },
+  {
+    id: '5',
+    username: 'leader',
+    password: 'leader123',
+    name: 'Music Director',
+    role: 'song_leader' as const
   }
 ];
 
@@ -148,6 +162,11 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
                       <p className="font-semibold" style={{ color: '#865014' }}>Admin Accounts:</p>
                       <p>Username: <code className="bg-white px-1">admin</code> / Password: <code className="bg-white px-1">admin123</code></p>
                       <p>Username: <code className="bg-white px-1">pastor</code> / Password: <code className="bg-white px-1">pastor123</code></p>
+                    </div>
+                    <div className="space-y-1 pt-2 border-t">
+                      <p className="font-semibold" style={{ color: '#B7791F' }}>Song Leader Accounts:</p>
+                      <p>Username: <code className="bg-white px-1">songleader</code> / Password: <code className="bg-white px-1">song123</code></p>
+                      <p>Username: <code className="bg-white px-1">leader</code> / Password: <code className="bg-white px-1">leader123</code></p>
                     </div>
                     <div className="space-y-1 pt-2 border-t">
                       <p className="font-semibold" style={{ color: '#E0AE3F' }}>Regular User:</p>

@@ -1,7 +1,7 @@
 export interface User {
   id: string;
   name: string;
-  role: 'admin' | 'user';
+  role: "admin" | "song_leader" | "user";
 }
 
 // Song types
@@ -14,11 +14,33 @@ export interface SongMetadata {
 export interface Song {
   id: number;
   number: string;
-  category: 'hymnal' | 'local';
+  category: "hymnal" | "local";
   titleAmharic: string;
   titleEnglish: string;
   lyrics: string[];
   metadata?: SongMetadata;
+}
+
+// Song List / Playlist types
+export interface SongListItem {
+  id: string;
+  songId: number;
+  songNumber: string;
+  songTitle: string;
+  songTitleAmharic: string;
+  selectedSlides?: number[]; // Specific slides/paragraphs, or undefined for entire song
+  notes?: string;
+}
+
+export interface SongList {
+  id: string;
+  name: string;
+  date: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  items: SongListItem[];
+  isActive?: boolean;
 }
 
 // BIBLE FEATURE - Commented out for song-only version
@@ -44,14 +66,13 @@ export interface Song {
 // }
 
 export interface DisplayState {
-  type: 'song' | 'bible' | 'none';
+  type: "song" | "bible" | "none";
   isVisible: boolean;
-  
+
   // Song display
   songId?: number;
-  songData?: Song;
   songSlide?: number;
-  
+
   // Bible display
   bibleVersion?: string;
   bibleBook?: string;
@@ -59,7 +80,7 @@ export interface DisplayState {
   bibleVerseStart?: number;
   bibleVerseEnd?: number;
   bibleText?: string;
-  
+
   background?: string;
   timestamp?: number;
 }

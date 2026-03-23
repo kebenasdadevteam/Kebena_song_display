@@ -7,9 +7,13 @@ export default function DisplayPage() {
   const ACTIVE_BACKGROUND_KEY = "display_background_active_v1";
   const LEGACY_UPLOADED_BACKGROUND_KEY = "display_background_uploaded_v1";
   const SONG_BACKGROUND_COLOR_KEY = "display_song_background_color_v1";
+  const SONG_TEXT_COLOR_KEY = "display_song_text_color_v1";
+  const SONG_FONT_SIZE_KEY = "display_song_font_size_px_v1";
   const [roomId, setRoomId] = useState<string>("");
   const [background, setBackground] = useState("#000000");
   const [songBackgroundColor, setSongBackgroundColor] = useState("#000000");
+  const [songTextColor, setSongTextColor] = useState("#ffffff");
+  const [songFontSize, setSongFontSize] = useState(56);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,6 +45,19 @@ export default function DisplayPage() {
       '#000000';
     setSongBackgroundColor(savedSongBg);
 
+    const savedSongText =
+      localStorage.getItem(`display_song_text_${id}`) ||
+      localStorage.getItem(SONG_TEXT_COLOR_KEY) ||
+      '#ffffff';
+    setSongTextColor(savedSongText);
+
+    const savedSongFontSize = Number(
+      localStorage.getItem(`display_song_font_${id}`) ||
+      localStorage.getItem(SONG_FONT_SIZE_KEY) ||
+      '56'
+    );
+    setSongFontSize(Number.isFinite(savedSongFontSize) ? savedSongFontSize : 56);
+
     // Listen for background updates
     const handleMessage = (e: MessageEvent) => {
       if (e.data?.type === "SET_BACKGROUND") {
@@ -55,13 +72,49 @@ export default function DisplayPage() {
         localStorage.setItem(`display_song_bg_${id}`, e.data.color);
         localStorage.setItem(SONG_BACKGROUND_COLOR_KEY, e.data.color);
       }
+
+      if (e.data?.type === 'SET_SONG_TEXT_COLOR') {
+        setSongTextColor(e.data.color);
+        localStorage.setItem(`display_song_text_${id}`, e.data.color);
+        localStorage.setItem(SONG_TEXT_COLOR_KEY, e.data.color);
+      }
+
+      if (e.data?.type === 'SET_SONG_FONT_SIZE') {
+        const size = Number(e.data.size);
+        if (Number.isFinite(size)) {
+          setSongFontSize(size);
+          localStorage.setItem(`display_song_font_${id}`, String(size));
+          localStorage.setItem(SONG_FONT_SIZE_KEY, String(size));
+        }
+      }
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === `display_song_bg_${id}` || event.key === SONG_BACKGROUND_COLOR_KEY) {
+        setSongBackgroundColor(event.newValue || '#000000');
+      }
+
+      if (event.key === `display_song_text_${id}` || event.key === SONG_TEXT_COLOR_KEY) {
+        setSongTextColor(event.newValue || '#ffffff');
+      }
+
+      if (event.key === `display_song_font_${id}` || event.key === SONG_FONT_SIZE_KEY) {
+        const nextSize = Number(event.newValue || '56');
+        if (Number.isFinite(nextSize)) {
+          setSongFontSize(nextSize);
+        }
+      }
     };
 
     globalThis.addEventListener("message", handleMessage);
+    globalThis.addEventListener("storage", handleStorage);
 
     setLoading(false);
 
-    return () => globalThis.removeEventListener("message", handleMessage);
+    return () => {
+      globalThis.removeEventListener("message", handleMessage);
+      globalThis.removeEventListener("storage", handleStorage);
+    };
   }, []);
 
   if (loading) {
@@ -80,6 +133,8 @@ export default function DisplayPage() {
       roomId={roomId}
       initialBackground={background}
       initialSongBackgroundColor={songBackgroundColor}
+      initialSongTextColor={songTextColor}
+      initialSongFontSize={songFontSize}
     />
   );
 }

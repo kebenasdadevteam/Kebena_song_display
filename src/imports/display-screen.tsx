@@ -7,12 +7,16 @@ interface DisplayScreenProps {
   readonly roomId: string;
   readonly initialBackground?: string;
   readonly initialSongBackgroundColor?: string;
+  readonly initialSongTextColor?: string;
+  readonly initialSongFontSize?: number;
 }
 
 export function DisplayScreen({
   roomId,
   initialBackground = "#000000",
   initialSongBackgroundColor = "#000000",
+  initialSongTextColor = "#ffffff",
+  initialSongFontSize = 56,
 }: Readonly<DisplayScreenProps>) {
   const normalizeBackgroundValue = (value: string) => {
     const trimmed = (value || "").trim();
@@ -43,6 +47,8 @@ export function DisplayScreen({
   const [displayState, setDisplayState] = useState(displayStateService.getCurrentState());
   const [background, setBackground] = useState(initialBackground);
   const [songBackgroundColor, setSongBackgroundColor] = useState(initialSongBackgroundColor);
+  const [songTextColor, setSongTextColor] = useState(initialSongTextColor);
+  const [songFontSize, setSongFontSize] = useState(initialSongFontSize);
   const [socketSong, setSocketSong] = useState<Song | null>(null);
   const [socketSlide, setSocketSlide] = useState(0);
 
@@ -79,6 +85,16 @@ export function DisplayScreen({
 
     if (message.type === 'song_background_changed' && message.data?.color) {
       setSongBackgroundColor(message.data.color);
+      return;
+    }
+
+    if (message.type === 'song_text_color_changed' && message.data?.color) {
+      setSongTextColor(message.data.color);
+      return;
+    }
+
+    if (message.type === 'song_font_size_changed' && Number.isFinite(Number(message.data?.size))) {
+      setSongFontSize(Number(message.data.size));
     }
   });
 
@@ -141,6 +157,17 @@ export function DisplayScreen({
       if (event.data?.type === 'SET_SONG_BG_COLOR') {
         setSongBackgroundColor(event.data.color || initialSongBackgroundColor);
       }
+
+      if (event.data?.type === 'SET_SONG_TEXT_COLOR') {
+        setSongTextColor(event.data.color || initialSongTextColor);
+      }
+
+      if (event.data?.type === 'SET_SONG_FONT_SIZE') {
+        const size = Number(event.data.size || initialSongFontSize);
+        if (Number.isFinite(size)) {
+          setSongFontSize(size);
+        }
+      }
     };
 
     channel.addEventListener("message", handleChannelMessage);
@@ -149,7 +176,7 @@ export function DisplayScreen({
       channel.removeEventListener("message", handleChannelMessage);
       channel.close();
     };
-  }, [roomId, initialBackground, initialSongBackgroundColor]);
+  }, [roomId, initialBackground, initialSongBackgroundColor, initialSongTextColor, initialSongFontSize]);
 
   // Handle background changes from parent window
   useEffect(() => {
@@ -160,6 +187,17 @@ export function DisplayScreen({
 
       if (e.data?.type === 'SET_SONG_BG_COLOR') {
         setSongBackgroundColor(e.data.color);
+      }
+
+      if (e.data?.type === 'SET_SONG_TEXT_COLOR') {
+        setSongTextColor(e.data.color);
+      }
+
+      if (e.data?.type === 'SET_SONG_FONT_SIZE') {
+        const size = Number(e.data.size);
+        if (Number.isFinite(size)) {
+          setSongFontSize(size);
+        }
       }
     };
 
@@ -175,6 +213,14 @@ export function DisplayScreen({
   useEffect(() => {
     setSongBackgroundColor(initialSongBackgroundColor);
   }, [initialSongBackgroundColor]);
+
+  useEffect(() => {
+    setSongTextColor(initialSongTextColor);
+  }, [initialSongTextColor]);
+
+  useEffect(() => {
+    setSongFontSize(initialSongFontSize);
+  }, [initialSongFontSize]);
 
   useEffect(() => {
     if (displayState.background) {
@@ -297,6 +343,14 @@ export function DisplayScreen({
     return () => globalThis.removeEventListener("keydown", handleKeyboardControl);
   }, [currentSong, currentSlide, displayState, resolvedBackground, socketSong]);
 
+  const normalizedSongTextColor = (songTextColor || "").trim().toLowerCase();
+  const displaySongTextColor =
+    normalizedSongTextColor === "#000000" ||
+    normalizedSongTextColor === "#000" ||
+    normalizedSongTextColor === "black"
+      ? "#000000"
+      : "#ffffff";
+
   return (
     <div
       className="fixed inset-0 flex items-center justify-center transition-all duration-500 p-4 overflow-hidden"
@@ -314,8 +368,9 @@ export function DisplayScreen({
           <div
             className="text-white text-3xl md:text-5xl lg:text-6xl leading-relaxed whitespace-pre-line"
             style={{
-              textShadow:
-                "2px 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5)",
+              color: displaySongTextColor,
+              fontSize: `${songFontSize}px`,
+              textShadow: "none",
             }}
           >
             {currentSong.lyrics[currentSlide]}
