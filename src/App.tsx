@@ -247,22 +247,22 @@ export default function App() {
           className="text-white p-4 shadow-lg flex-shrink-0"
           style={{ background: "linear-gradient(to right, #865014, #E0AE3F)" }}
         >
-          <div className="container mx-auto flex justify-between items-center">
-            <div className="flex items-center gap-4">
+          <div className="container mx-auto flex flex-col gap-3 lg:flex-row lg:justify-between lg:items-center">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
               <img
                 src={churchLogo}
                 alt="Kebena Church Logo"
-                className="h-12 w-12 object-contain"
+                className="h-10 w-10 sm:h-12 sm:w-12 object-contain flex-shrink-0"
               />
-              <div>
-                <h1 className="text-2xl">Kebena Church Song Display</h1>
-                <p className="text-sm" style={{ color: "#F6EBD8" }}>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-2xl truncate">Kebena Church Song Display</h1>
+                <p className="text-xs sm:text-sm truncate" style={{ color: "#F6EBD8" }}>
                   የቀበና ቤተክርስትያን የመዝሙር ማሳያ
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right mr-2">
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-start lg:justify-end">
+              <div className="hidden sm:block text-right mr-1 sm:mr-2">
                 <p className="text-sm">{currentUser.name}</p>
                 <p className="text-xs" style={{ color: "#F6EBD8" }}>
                   {currentUser.role === "admin"
@@ -277,22 +277,22 @@ export default function App() {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowMobileControl(!showMobileControl)}
-                className="text-black border-white hover:bg-white/20"
+                className="text-black border-white hover:bg-white/20 h-8 px-2 sm:h-9 sm:px-3"
                 title="Mobile Control & Sync"
               >
-                <Smartphone className="size-4 mr-2" />
-                Mobile
+                <Smartphone className="size-4 sm:mr-2" />
+                <span className="hidden sm:inline">Mobile</span>
               </Button>
               {/* Song List Manager */}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowSongListManager(!showSongListManager)}
-                className="text-black border-white hover:bg-white/20"
+                className="text-black border-white hover:bg-white/20 h-8 px-2 sm:h-9 sm:px-3"
                 title={currentUser.role === "user" ? "View worship song lists" : "Manage Song Lists for Worship"}
               >
-                <List className="size-4 mr-2" />
-                Song Lists
+                <List className="size-4 sm:mr-2" />
+                <span className="hidden sm:inline">Song Lists</span>
               </Button>
               {/* XML Import Button (Admin Only) */}
               {isAdmin && (
@@ -300,11 +300,11 @@ export default function App() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowXMLImporter(!showXMLImporter)}
-                  className="text-black border-white hover:bg-white/20"
+                  className="text-black border-white hover:bg-white/20 h-8 px-2 sm:h-9 sm:px-3"
                   title="Import Songs from XML"
                 >
-                  <Upload className="size-4 mr-2" />
-                  Import XML
+                  <Upload className="size-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Import XML</span>
                 </Button>
               )}
               {/* Admin Panel Button */}
@@ -313,10 +313,10 @@ export default function App() {
                   variant="outline"
                   size="sm"
                   onClick={() => setShowAdminPanel(!showAdminPanel)}
-                  className="text-black border-white hover:bg-white/20"
+                  className="text-black border-white hover:bg-white/20 h-8 px-2 sm:h-9 sm:px-3"
                 >
-                  <Settings className="size-4 mr-2" />
-                  Admin
+                  <Settings className="size-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Admin</span>
                 </Button>
               )}
               {/* Logout Button */}
@@ -324,10 +324,10 @@ export default function App() {
                 variant="outline"
                 size="sm"
                 onClick={handleLogout}
-                className="text-black border-white hover:bg-white/20"
+                className="text-black border-white hover:bg-white/20 h-8 px-2 sm:h-9 sm:px-3"
               >
-                <LogOut className="size-4 mr-2" />
-                Logout
+                <LogOut className="size-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
@@ -337,14 +337,14 @@ export default function App() {
         <div className="flex-1 flex overflow-hidden min-h-0">
           {!selectedSong ? (
             /* Split View: Hymnal & Local Songs */
-            <div className="h-full grid grid-cols-2 gap-4 p-4 overflow-hidden w-full">
+            <div className="h-full grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 overflow-hidden w-full">
               {/* Hymnal Section */}
-              <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col overflow-hidden">
+              <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 flex flex-col overflow-hidden">
                 <div
                   className="mb-4 pb-4 border-b flex-shrink-0"
                   style={{ borderColor: "#865014" }}
                 >
-                  <h2 className="text-xl" style={{ color: "#865014" }}>
+                  <h2 className="text-lg sm:text-xl" style={{ color: "#865014" }}>
                     Hymnal Songs
                   </h2>
                   <p className="text-sm text-gray-600">ውዳሴ መዝሙሮች</p>
@@ -365,12 +365,12 @@ export default function App() {
               </div>
 
               {/* Local Songs Section */}
-              <div className="bg-white rounded-lg shadow-lg p-6 flex flex-col overflow-hidden">
+              <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 flex flex-col overflow-hidden">
                 <div
                   className="mb-4 pb-4 border-b flex-shrink-0"
                   style={{ borderColor: "#E0AE3F" }}
                 >
-                  <h2 className="text-xl" style={{ color: "#E0AE3F" }}>
+                  <h2 className="text-lg sm:text-xl" style={{ color: "#E0AE3F" }}>
                     Local Songs
                   </h2>
                   <p className="text-sm text-gray-600">ሀገርኛ መዝሙሮች</p>

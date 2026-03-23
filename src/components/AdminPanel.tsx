@@ -852,9 +852,9 @@ export function AdminPanel({
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden p-0 border-0 shadow-2xl">
-        <DialogHeader className="px-6 py-5 border-b bg-gradient-to-r from-[#2f1a09] via-[#5a3412] to-[#865014]">
-          <DialogTitle className="text-2xl tracking-wide text-white">
+      <DialogContent className="w-[95vw] max-w-6xl max-h-[92vh] overflow-hidden p-0 border-0 shadow-2xl">
+        <DialogHeader className="px-4 sm:px-6 py-4 sm:py-5 border-b bg-gradient-to-r from-[#2f1a09] via-[#5a3412] to-[#865014]">
+          <DialogTitle className="text-xl sm:text-2xl tracking-wide text-white">
             Admin Panel - የአስተዳዳሪ ፓነል
           </DialogTitle>
           <DialogDescription className="text-[#F6EBD8]">
@@ -862,47 +862,47 @@ export function AdminPanel({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="px-6 py-5 overflow-y-auto max-h-[calc(90vh-110px)] bg-gradient-to-b from-[#fff9f2] to-white">
+        <div className="px-3 sm:px-6 py-4 sm:py-5 overflow-y-auto max-h-[calc(92vh-110px)] bg-gradient-to-b from-[#fff9f2] to-white">
         <Tabs defaultValue="manage-songs" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 h-auto p-1 bg-[#F6EBD8] border border-[#E8D2B4] rounded-xl shadow-sm">
+          <TabsList className="flex w-full overflow-x-auto h-auto p-1 bg-[#F6EBD8] border border-[#E8D2B4] rounded-xl shadow-sm gap-1">
             <TabsTrigger
               value="manage-songs"
-              className="flex-col gap-1 py-2 px-2 rounded-lg text-[#5f3a16] data-[state=active]:bg-white data-[state=active]:text-[#865014] data-[state=active]:shadow"
+              className="min-w-[90px] flex-col gap-1 py-2 px-2 rounded-lg text-[#5f3a16] data-[state=active]:bg-white data-[state=active]:text-[#865014] data-[state=active]:shadow"
             >
               <Edit2 className="size-4" />
               <span className="text-xs">Manage</span>
             </TabsTrigger>
             <TabsTrigger
               value="auto-detect"
-              className="flex-col gap-1 py-2 px-2 rounded-lg text-[#5f3a16] data-[state=active]:bg-white data-[state=active]:text-[#865014] data-[state=active]:shadow"
+              className="min-w-[90px] flex-col gap-1 py-2 px-2 rounded-lg text-[#5f3a16] data-[state=active]:bg-white data-[state=active]:text-[#865014] data-[state=active]:shadow"
             >
               <FolderOpen className="size-4" />
               <span className="text-xs">Auto-Detect</span>
             </TabsTrigger>
             <TabsTrigger
               value="add-from-file"
-              className="flex-col gap-1 py-2 px-2 rounded-lg text-[#5f3a16] data-[state=active]:bg-white data-[state=active]:text-[#865014] data-[state=active]:shadow"
+              className="min-w-[90px] flex-col gap-1 py-2 px-2 rounded-lg text-[#5f3a16] data-[state=active]:bg-white data-[state=active]:text-[#865014] data-[state=active]:shadow"
             >
               <Upload className="size-4" />
               <span className="text-xs">Upload</span>
             </TabsTrigger>
             <TabsTrigger
               value="add-manually"
-              className="flex-col gap-1 py-2 px-2 rounded-lg text-[#5f3a16] data-[state=active]:bg-white data-[state=active]:text-[#865014] data-[state=active]:shadow"
+              className="min-w-[90px] flex-col gap-1 py-2 px-2 rounded-lg text-[#5f3a16] data-[state=active]:bg-white data-[state=active]:text-[#865014] data-[state=active]:shadow"
             >
               <FileText className="size-4" />
               <span className="text-xs">Manual</span>
             </TabsTrigger>
             <TabsTrigger
               value="user-management"
-              className="flex-col gap-1 py-2 px-2 rounded-lg text-[#5f3a16] data-[state=active]:bg-white data-[state=active]:text-[#865014] data-[state=active]:shadow"
+              className="min-w-[90px] flex-col gap-1 py-2 px-2 rounded-lg text-[#5f3a16] data-[state=active]:bg-white data-[state=active]:text-[#865014] data-[state=active]:shadow"
             >
               <Users className="size-4" />
               <span className="text-xs">Users</span>
             </TabsTrigger>
             <TabsTrigger
               value="settings"
-              className="flex-col gap-1 py-2 px-2 rounded-lg text-[#5f3a16] data-[state=active]:bg-white data-[state=active]:text-[#865014] data-[state=active]:shadow"
+              className="min-w-[90px] flex-col gap-1 py-2 px-2 rounded-lg text-[#5f3a16] data-[state=active]:bg-white data-[state=active]:text-[#865014] data-[state=active]:shadow"
             >
               <Palette className="size-4" />
               <span className="text-xs">Settings</span>
@@ -930,7 +930,7 @@ export function AdminPanel({
                   </h3>
                 </Card>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-number">Song Number *</Label>
                     <Input
@@ -1036,8 +1036,8 @@ export function AdminPanel({
                 </div>
               </form>
             ) : (
-              <div className="border rounded-lg overflow-hidden">
-                <Table>
+              <div className="border rounded-lg overflow-hidden overflow-x-auto">
+                <Table className="min-w-[760px]">
                   <TableHeader>
                     <TableRow>
                       <TableHead>#</TableHead>
@@ -1243,7 +1243,7 @@ export function AdminPanel({
                   </div>
                 </Card>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="detected-number">Song Number *</Label>
                     <Input
@@ -1444,7 +1444,7 @@ export function AdminPanel({
 
                 {!isProcessing && extractedSlides.length > 0 && (
                   <>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="file-number">Song Number *</Label>
                         <Input
@@ -1577,7 +1577,7 @@ export function AdminPanel({
                 </AlertDescription>
               </Alert>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="manual-number">Song Number *</Label>
                   <Input
@@ -1876,7 +1876,7 @@ export function AdminPanel({
                   <Label className="mb-2 block">
                     Quick Background Presets (Images)
                   </Label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => {
@@ -1938,7 +1938,7 @@ export function AdminPanel({
                 Choose a preset color for the display background (instead of an
                 image)
               </p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {backgroundPresets.map((preset) => (
                   <button
                     key={preset.value}
@@ -2002,7 +2002,7 @@ export function AdminPanel({
           <TabsContent value="user-management" className="space-y-6">
             <div>
               <Label className="mb-3 block">User Management</Label>
-              <div className="flex justify-between items-center">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 justify-between sm:items-center">
                 <h3 className="font-medium">Users</h3>
                 <Button
                   onClick={() => setIsAddingUser(true)}
@@ -2015,8 +2015,8 @@ export function AdminPanel({
               </div>
             </div>
 
-            <div className="border rounded-lg overflow-hidden">
-              <Table>
+            <div className="border rounded-lg overflow-hidden overflow-x-auto">
+              <Table className="min-w-[760px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Username</TableHead>
@@ -2105,7 +2105,7 @@ export function AdminPanel({
                   </h3>
                 </Card>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="add-username">Username *</Label>
                     <Input
@@ -2206,7 +2206,7 @@ export function AdminPanel({
                   </h3>
                 </Card>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="edit-username">Username *</Label>
                     <Input

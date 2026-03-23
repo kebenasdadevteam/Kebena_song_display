@@ -220,13 +220,13 @@ export function SongViewer({
   return (
     <div className="fixed inset-0 z-50 flex flex-col">
       {/* Control Bar */}
-      <div className="bg-black/90 text-white p-4 flex justify-between items-center">
-        <div>
-          <h2 className="text-xl">{song.titleAmharic}</h2>
-          <p className="text-sm text-gray-300">{song.titleEnglish} - #{song.number}</p>
+      <div className="bg-black/90 text-white p-3 sm:p-4 flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
+        <div className="min-w-0">
+          <h2 className="text-base sm:text-xl truncate">{song.titleAmharic}</h2>
+          <p className="text-xs sm:text-sm text-gray-300 truncate">{song.titleEnglish} - #{song.number}</p>
         </div>
         
-        <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap overflow-x-auto">
+        <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap overflow-x-auto pb-1 w-full sm:w-auto">
           {/* Slide Counter */}
           <span className="text-sm px-3 py-1 bg-white/10 rounded">
             {currentSlide + 1} / {song.lyrics.length}
@@ -375,7 +375,7 @@ export function SongViewer({
 
       {/* Slide Display */}
       <div 
-        className="flex-1 flex items-center justify-center p-8 transition-colors duration-300"
+        className="flex-1 flex items-center justify-center p-4 sm:p-8 transition-colors duration-300"
         style={{ backgroundColor: bgColor }}
       >
         <div className="max-w-5xl w-full text-center">
@@ -394,7 +394,7 @@ export function SongViewer({
       </div>
 
       {/* Navigation Controls */}
-      <div className="bg-black/90 p-6 flex justify-center items-center gap-4">
+      <div className="bg-black/90 p-3 sm:p-6 flex justify-center items-center gap-2 sm:gap-4">
         <Button
           onClick={prevSlide}
           disabled={currentSlide === 0}
@@ -403,11 +403,11 @@ export function SongViewer({
           className="text-black border-white hover:bg-white/20"
         >
           <ChevronLeft className="size-6 mr-2" />
-          Previous
+          <span className="hidden sm:inline">Previous</span>
         </Button>
 
         {/* Slide Indicators */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto max-w-[42vw] sm:max-w-none px-1">
           {song.lyrics.map((_, index) => (
             <button
               key={index}
@@ -429,13 +429,13 @@ export function SongViewer({
           variant="outline"
           className="text-black border-white hover:bg-white/20"
         >
-          Next
+          <span className="hidden sm:inline">Next</span>
           <ChevronRight className="size-6 ml-2" />
         </Button>
       </div>
 
       {/* Keyboard Hints */}
-      <div className="absolute bottom-24 right-8 bg-black/70 text-white text-xs p-3 rounded">
+      <div className="hidden md:block absolute bottom-24 right-8 bg-black/70 text-white text-xs p-3 rounded">
         <p>← → : Navigate slides</p>
         <p>PgUp / PgDn: Navigate slides</p>
         <p>Home / End: First / Last slide</p>

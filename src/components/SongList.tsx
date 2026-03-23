@@ -37,7 +37,7 @@ export function SongList({ songs, onSelectSong, isAdmin, onEditSong, onDeleteSon
   return (
     <div className="flex flex-col flex-1 min-h-0">
       {/* Search Bar */}
-      <div className="mb-4 relative flex-shrink-0">
+      <div className="mb-3 sm:mb-4 relative flex-shrink-0">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
         <Input
           type="text"
@@ -49,7 +49,7 @@ export function SongList({ songs, onSelectSong, isAdmin, onEditSong, onDeleteSon
       </div>
 
       {/* Song List */}
-      <div className="flex-1 overflow-y-auto pr-2">
+      <div className="flex-1 overflow-y-auto pr-1 sm:pr-2">
         <div className="space-y-2">
           {filteredSongs.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
@@ -60,7 +60,7 @@ export function SongList({ songs, onSelectSong, isAdmin, onEditSong, onDeleteSon
             filteredSongs.map(song => (
               <div
                 key={song.id}
-                className="border rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer group"
+                className="border rounded-lg p-3 sm:p-4 hover:bg-gray-50 transition-colors cursor-pointer group"
                 onClick={() => onSelectSong(song)}
               >
                 <div className="flex justify-between items-start gap-2">
@@ -73,12 +73,12 @@ export function SongList({ songs, onSelectSong, isAdmin, onEditSong, onDeleteSon
                         #{song.number}
                       </span>
                     </div>
-                    <h3 className="text-gray-900 mb-1">{song.titleAmharic}</h3>
+                    <h3 className="text-gray-900 mb-1 text-sm sm:text-base">{song.titleAmharic}</h3>
                     <p className="text-sm text-gray-600">{song.titleEnglish}</p>
                   </div>
 
                   {isAdmin && (
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="ghost"
                         size="sm"
