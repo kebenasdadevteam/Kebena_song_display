@@ -35,7 +35,19 @@ wss.on("connection", (ws, req) => {
     room.set(deviceType, new Set());
   }
 
-  room.get(deviceType).add(ws);
+  const deviceSet = room.get(deviceType);
+
+  // Keep exactly one active display per room while allowing multiple controls.
+  if (deviceType === "display" && deviceSet.size > 0) {
+    deviceSet.forEach((client) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.close(4000, "Display replaced by a new display client");
+      }
+    });
+    deviceSet.clear();
+  }
+
+  deviceSet.add(ws);
 
   // Send welcome message
   ws.send(

@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { X, ChevronLeft, ChevronRight, Play, Pause, Moon, Sun, Monitor, Eye, EyeOff, Type, Minus, Plus } from 'lucide-react';
 import { displayStateService } from '../services/displayStateService';
 import { toast } from 'sonner';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 interface SongViewerProps {
   song: Song;
@@ -45,6 +46,7 @@ export function SongViewer({
       ? Math.min(Math.max(initialSongFontSize, MIN_FONT_SIZE), MAX_FONT_SIZE)
       : 56
   );
+  const { sendMessage } = useWebSocket('control', roomId || 'default');
 
   // Initialize display service
   useEffect(() => {
@@ -74,6 +76,10 @@ export function SongViewer({
       channel.postMessage({ type: 'SET_SONG_FONT_SIZE', size: songFontSize });
       channel.close();
     }
+
+    sendMessage('song_background_changed', { color: songBackgroundColor });
+    sendMessage('song_text_color_changed', { color: songTextColor });
+    sendMessage('song_font_size_changed', { size: songFontSize });
   }, [roomId, songBackgroundColor, songTextColor, songFontSize]);
 
   const updateDisplay = async () => {
@@ -95,6 +101,9 @@ export function SongViewer({
       channel.close();
     }
 
+    sendMessage('select_song', { song });
+    sendMessage('change_slide', { slideIndex: currentSlide });
+
     onSyncSongToDisplay?.(song, currentSlide);
   };
 
@@ -113,6 +122,7 @@ export function SongViewer({
       isVisible: false,
       background,
     });
+    sendMessage('clear_song', {});
     onClearDisplay?.();
     toast.info('Display cleared');
   };
@@ -126,6 +136,7 @@ export function SongViewer({
           isVisible: false,
           background,
         });
+        sendMessage('clear_song', {});
       }
     };
   }, [isDisplaying, background]);

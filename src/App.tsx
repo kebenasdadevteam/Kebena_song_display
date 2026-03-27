@@ -21,8 +21,16 @@ import { initialSongs } from "./data/songs";
 import { toast, Toaster } from "sonner";
 import churchLogo from "figma:asset/3887ae57771394e51301a4417cbc2775554606f6.png";
 import { dualStorageService } from "./services/dualStorage";
+import { useWebSocket } from "./hooks/useWebSocket";
 
 export default function App() {
+  const ROOM_ID_STORAGE_KEY = "church_room_id";
+  const pathParts = globalThis.location.pathname.split("/").filter(Boolean);
+  const roomIdFromPath =
+    pathParts[0] === "control" && pathParts[1]
+      ? decodeURIComponent(pathParts[1])
+      : "";
+
   const [songs, setSongs] = useState<Song[]>([]);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [extendedScreenWindow, setExtendedScreenWindow] = useState<Window | null>(null);
@@ -32,11 +40,16 @@ export default function App() {
   const [showXMLImporter, setShowXMLImporter] = useState(false);
   const [showSongListManager, setShowSongListManager] = useState(false);
   const [roomId, setRoomId] = useState<string>(() => {
+    if (roomIdFromPath) {
+      localStorage.setItem(ROOM_ID_STORAGE_KEY, roomIdFromPath);
+      return roomIdFromPath;
+    }
+
     // Generate or retrieve room ID from localStorage
-    const saved = localStorage.getItem("church_room_id");
+    const saved = localStorage.getItem(ROOM_ID_STORAGE_KEY);
     if (saved) return saved;
     const newRoomId = `room_${Date.now()}`;
-    localStorage.setItem("church_room_id", newRoomId);
+    localStorage.setItem(ROOM_ID_STORAGE_KEY, newRoomId);
     return newRoomId;
   });
   const [background, setBackground] = useState<string>(() => {
@@ -50,6 +63,16 @@ export default function App() {
   // const [viewMode, setViewMode] = useState<'control' | 'display'>('control');
 
   // Save background to localStorage when it changes
+  const { sendMessage: sendControlMessage } = useWebSocket("control", roomId || "default");
+
+  useEffect(() => {
+    if (!roomIdFromPath) return;
+    if (roomId !== roomIdFromPath) {
+      setRoomId(roomIdFromPath);
+    }
+    localStorage.setItem(ROOM_ID_STORAGE_KEY, roomIdFromPath);
+  }, [roomIdFromPath, roomId]);
+
   useEffect(() => {
     localStorage.setItem("display_background", background);
     localStorage.setItem("display_background_active_v1", background);
@@ -62,6 +85,8 @@ export default function App() {
       });
       channel.close();
     }
+
+    sendControlMessage("background_changed", { background });
   }, [background, roomId]);
 
   // BIBLE FEATURE - Commented out for song-only version
