@@ -67,7 +67,9 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:lan": "vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
-    "ws": "node src/imports/websocket-server.js"
+    "ws": "node src/imports/websocket-server.js",
+    "ws:lan": "set WS_HOST=0.0.0.0&& set WS_PORT=8080&& node src/imports/websocket-server.js"
   }
 }

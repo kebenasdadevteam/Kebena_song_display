@@ -2,6 +2,9 @@ import WebSocket, { WebSocketServer } from "ws";
 import { createServer } from "node:http";
 import { parse } from "node:url";
 
+const WS_HOST = process.env.WS_HOST || "0.0.0.0";
+const WS_PORT = Number(process.env.WS_PORT || 8080);
+
 const server = createServer();
 const wss = new WebSocketServer({ server });
 
@@ -210,13 +213,13 @@ setInterval(() => {
   });
 }, 30000);
 
-server.listen(8080, () => {
+server.listen(WS_PORT, WS_HOST, () => {
   console.log("=======================================");
-  console.log("📡 WebSocket Server Running on port 8080");
+  console.log(`📡 WebSocket Server Running on ${WS_HOST}:${WS_PORT}`);
   console.log("=======================================");
   console.log("URL Structure:");
-  console.log("- Control: ws://localhost:8080/control/{roomId}");
-  console.log("- Display: ws://localhost:8080/display/{roomId}");
+  console.log(`- Control: ws://<server-ip>:${WS_PORT}/control/{roomId}`);
+  console.log(`- Display: ws://<server-ip>:${WS_PORT}/display/{roomId}`);
   console.log("=======================================");
 });
 

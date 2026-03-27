@@ -1,4 +1,8 @@
-const API_URL = 'http://localhost:5000/api';
+const API_BASE =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ||
+  `${globalThis.location.protocol}//${globalThis.location.hostname}:5000/api`;
+
+const API_URL = API_BASE.replace(/\/$/, '');
 
 // Helper to get auth token
 const getAuthToken = () => localStorage.getItem('auth_token');

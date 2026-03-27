@@ -17,7 +17,6 @@ import {
   List,
 } from "lucide-react";
 import { Song, User as UserType } from "./types";
-import { initialSongs } from "./data/songs";
 import { toast, Toaster } from "sonner";
 import churchLogo from "figma:asset/3887ae57771394e51301a4417cbc2775554606f6.png";
 import { dualStorageService } from "./services/dualStorage";
@@ -125,18 +124,16 @@ export default function App() {
           });
         }
       } else {
-        // If no songs, use initial songs as fallback
-        setSongs(initialSongs);
-        toast.info("Using sample data", {
-          description: "No songs found. Using sample data.",
+        setSongs([]);
+        toast.info("No songs found", {
+          description: "Upload or import songs to populate the shared song list.",
         });
       }
     } catch (error: any) {
       console.error("Error loading songs:", error);
-      // Fallback to initial songs
-      setSongs(initialSongs);
-      toast.warning("Using sample data", {
-        description: "Could not load songs. Using sample data.",
+      setSongs([]);
+      toast.warning("Could not load songs", {
+        description: "Check backend connectivity and try again.",
       });
     } finally {
       setIsLoading(false);
